@@ -1,0 +1,96 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  realName  String
+  role      String   @default("reviewer")  // admin, reviewer, viewer
+  status    Int       @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  labels    Label[]
+  reviews   Review[]
+
+  @@map("users")
+}
+
+model Label {
+  id             Int       @id @default(autoincrement())
+  labelNo        String    @unique
+  foodName       String?
+  foodType       String?   // 预包装食品, 食用农产品, 进口食品
+  imageUrl       String
+  ocrText        String?   // OCR 识别结果 (JSON)
+  ocrStatus      String    @default("pending") // pending, processing, done, failed
+  uploadUserId   Int
+  uploadUser     User      @relation(fields: [uploadUserId], references: [id])
+  review         Review?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("labels")
+}
+
+model Review {
+  id              Int       @id @default(autoincrement())
+  labelId         Int       @unique
+  label           Label     @relation(fields: [labelId], references: [id])
+  reviewerId      Int
+  reviewer        User      @relation(fields: [reviewerId], references: [id])
+  status          String    @default("pending") // pending, reviewing, approved, rejected
+  overallResult   String?   // pass, fail, conditional_pass
+  items           ReviewItem[]
+  report          Report?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("reviews")
+}
+
+model ReviewItem {
+  id          Int       @id @default(autoincrement())
+  reviewId    Int
+  review      Review    @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  category    String    // 必备标识, 配料表, 营养成分, 日期标注, etc.
+  checkName   String    // 检查项名称
+  regulation  String?   // 对应法规条文
+  result      String    @default("pending") // pass, fail, not_applicable, pending
+  issue       String?   // 问题描述
+  suggestion  String?   // 修改建议
+  severity    String    @default("info") // critical, major, minor, info
+
+  @@map("review_items")
+}
+
+model Regulation {
+  id             Int       @id @default(autoincrement())
+  code           String    @unique
+  name           String
+  category       String    // GB7718, GB28050, GB2760, etc.
+  content        String
+  foodType       String?   // 适用食品类型
+  effectiveDate  DateTime?
+  status         Int       @default(1)
+  createdAt      DateTime  @default(now())
+
+  @@map("regulations")
+}
+
+model Report {
+  id          Int       @id @default(autoincrement())
+  reviewId    Int       @unique
+  review      Review    @relation(fields: [reviewId], references: [id])
+  reportNo    String    @unique
+  content     String    // 报告内容 (JSON)
+  generatedAt DateTime  @default(now())
+
+  @@map("reports")
+}

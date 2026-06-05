@@ -1,0 +1,28 @@
+{
+  "name": "food-label-review",
+  "version": "1.0.0",
+  "description": "食品标签审核软件 - Food Label Review System",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "setup": "pnpm install && pnpm --filter server prisma:generate && pnpm --filter server prisma:migrate"
+  },
+  "keywords": [
+    "food",
+    "label",
+    "review",
+    "compliance"
+  ],
+  "author": "Food Label Review Team",
+  "license": "MIT",
+  "devDependencies": {
+    "turbo": "^1.10.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}
