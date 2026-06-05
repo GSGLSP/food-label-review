@@ -1,1 +1,0 @@
-﻿const fs=require('fs'); const code=fs.readFileSync('./src/modules/report/report.service.ts','utf8'); let d=0; for(let i=0;i<code.length;i++){if(code[i]==='{'){d++;}else if(code[i]==='}'){d--; if(d===-1){console.log('first neg at',i,JSON.stringify(code.substring(Math.max(0,i-10),i+10))); break;}}}
